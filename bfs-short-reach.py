@@ -1,19 +1,20 @@
 # Enter your code here. Read input from STDIN. Print output to STDOUT
-def bfs_paths(graph, start, goal):
-    queue = [(start, [start])]
+import itertools
+
+def bfs_paths(graph, start):
+    visited, queue = set(), [(start, [start])]
+    paths_len = {}
+    for j in range(len(graph)):
+        paths_len[j+1] = None
     while queue:
         (vertex, path) = queue.pop(0)
-        for next in graph[vertex] - set(path):
-            if next == goal:
-                yield path + [next]
-            else:
+        if vertex not in visited:
+            visited.add(vertex)
+            for next in graph[vertex] - set(path):
                 queue.append((next, path + [next]))
-                
-def shortest_path(graph, start, goal):
-    try:
-        return next(bfs_paths(graph, start, goal))
-    except StopIteration:
-        return None
+                if (paths_len[next] == None or paths_len[next] > len(path)):
+                    paths_len[next] = len(path)
+    return paths_len
 
 def insertEdge(graph, n1, n2):
     graph[n1].add(n2)
@@ -35,10 +36,10 @@ for i in range(q):
         insertEdge(graph, node_temp[0], node_temp[1])
     s = int(raw_input())
     line = ""
-    for key in sorted(graph):
-        if (s == key): continue
-        n_path = shortest_path(graph, s, key)
-        if (n_path == None): n_path = -1
-        else: n_path = (len(n_path)-1) * 6
-        line += " " + str(n_path)
+    paths = bfs_paths(graph, s)
+    for k,v in sorted(paths.iteritems()):
+        if k == s: continue
+        if v == None: v = -1
+        else: v *= 6
+        line += str(v) + " "
     print(line.strip())
